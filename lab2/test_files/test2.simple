@@ -1,0 +1,12 @@
+function factorial(n) -> int {
+   i -> int;
+   result -> int;
+    
+    while (i <= n) {
+        result = result * i;
+        i = i + 1;
+        
+    }
+    
+    return result;
+}

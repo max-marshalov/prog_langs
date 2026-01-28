@@ -1,0 +1,42 @@
+        RBRACE: '}'=== Parsing file: example.c ===
+=== Source code ===
+
+int main() {
+    printf("Hello, World!\n"); 
+    return 0;
+}
+==================================================
+=== Parse Tree ===
+source
+  sourceItem
+    funcDef
+      funcSignature
+        typeRef
+          builtinType
+            INT: 'int'
+        IDENTIFIER: 'main'
+        LPAREN: '('
+        argDefList
+        RPAREN: ')'
+      block
+        LBRACE: '{'
+        statement
+          expressionStatement
+            expr
+              expr
+                IDENTIFIER: 'printf'
+              LPAREN: '('
+              exprList
+                expr
+                  literal
+                    STRING: '"Hello, World!\n"'
+              RPAREN: ')'
+            SEMI: ';'
+        statement
+          returnStatement
+            RETURN: 'return'
+            expr
+              literal
+                DEC: '0'
+            SEMI: ';'
+        RBRACE: '}'

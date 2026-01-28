@@ -1,0 +1,7 @@
+function max(a, b) -> int {
+    if (a > b) {
+        return a;
+    }
+    return b;
+    
+}
