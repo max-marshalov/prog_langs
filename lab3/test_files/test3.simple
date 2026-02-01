@@ -1,0 +1,4 @@
+function x() -> int{
+    printf();
+    return 0;
+}

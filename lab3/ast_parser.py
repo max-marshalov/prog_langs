@@ -158,17 +158,29 @@ class SimpleParser:
             func_node.children.append(body_node)
         
         return func_node, lines_consumed
+    
     def _parse_function_body(self, body_text: str, start_line: int, 
-                            file_name: str) -> ASTNode:
+                        file_name: str) -> ASTNode:
         """Разбор тела функции"""
+        print(f"\nDEBUG _parse_function_body:")
+        print(f"  body_text: '{body_text}'")
+        print(f"  start_line: {start_line}")
+        
         body_node = ASTNode(type='function_body', line=start_line, column=1)
         
-        lines = body_text.split('\n')
-        line_num = start_line
+        if not body_text.strip():
+            print(f"  Empty body text")
+            return body_node
         
+        lines = body_text.split('\n')
+        print(f"  Split into {len(lines)} lines")
+        
+        line_num = start_line
         i = 0
+        
         while i < len(lines):
             line = lines[i].strip()
+            print(f"  Line {i} (absolute {line_num}): '{line}'")
             
             if not line:
                 i += 1
@@ -176,12 +188,16 @@ class SimpleParser:
                 continue
             
             stmt_node, lines_consumed = self._parse_statement(lines[i:], line_num, file_name)
+            
             if stmt_node:
+                print(f"    Parsed statement: type={stmt_node.type}, value={stmt_node.value}")
                 body_node.children.append(stmt_node)
             
+            print(f"    Consumed {lines_consumed} lines")
             i += lines_consumed
             line_num += lines_consumed
         
+        print(f"  Total statements in body: {len(body_node.children)}")
         return body_node
     
     def _parse_statement(self, lines: List[str], line_num: int, 
@@ -193,6 +209,42 @@ class SimpleParser:
             return None, 1
         
         line = line.rstrip(';')
+        
+        # Проверяем вызовы функций ПЕРВЫМ делом
+        # Используем регулярное выражение для поиска вызова функции
+        if '(' in line and ')' in line:
+            # Ищем паттерн: имя_функции(аргументы)
+            # Это регулярное выражение ищет имя функции, затем скобки с содержимым
+            # Оно должно обрабатывать вложенные скобки внутри аргументов
+            pattern = r'^(\w+)\s*\((.*)\)\s*$'
+            match = re.match(pattern, line)
+            
+            if match:
+                func_name = match.group(1)
+                args_str = match.group(2)
+                
+                # Проверяем, что это действительно вызов функции, а не что-то еще
+                # Исключаем ключевые слова
+                if func_name not in ['if', 'while', 'for', 'do', 'return', 'break', 'continue']:
+                    print(f"    DEBUG: Found function call: {func_name}({args_str})")
+                    
+                    node = ASTNode(type='call', line=line_num, column=1)
+                    node.children.append(ASTNode(
+                        type='function_name',
+                        value=func_name,
+                        line=line_num,
+                        column=1
+                    ))
+                    
+                    # Парсим аргументы
+                    if args_str.strip():
+                        args = self._parse_expression_list(args_str, line_num)
+                        for arg in args:
+                            node.children.append(arg)
+                    
+                    return node, 1
+        
+        # Остальные проверки остаются как были
         if line.startswith('for '):
             return self._parse_for_statement(lines, line_num, file_name)
         
@@ -205,13 +257,10 @@ class SimpleParser:
         elif line.startswith('while '):
             return self._parse_while_statement(lines, line_num, file_name)
         
-       
-        
         elif line.startswith('return '):
             node = ASTNode(type='return', line=line_num, column=1)
             ret_val = line[7:].strip()
             if ret_val:
-                # ИЗМЕНЕНИЕ: парсим все выражение целиком
                 node.children.append(ASTNode(
                     type='expression',
                     value=ret_val,
@@ -364,6 +413,22 @@ class SimpleParser:
         if self.debug:
             print(f"\n    [DEBUG] Parsing IF statement at line {line_num}")
             print(f"      First line: '{lines[0]}'")
+        
+        first_line = lines[0].strip()
+        
+        # Извлекаем условие с учетом вложенных скобок
+        condition = self._extract_condition(first_line)
+        if not condition:
+            self.errors.append(ParsingError(
+                file_name=file_name,
+                line=line_num,
+                column=1,
+                message="Некорректный оператор if"
+            ))
+            return None, 1
+        
+        if self.debug:
+            print(f"      Condition: '{condition}'")
         
         first_line = lines[0].strip()
         
@@ -833,34 +898,48 @@ class SimpleParser:
         paren_count = 0
         bracket_count = 0
         brace_count = 0
+        in_string = False
+        string_char = None  # ' или "
         
         i = 0
         while i < len(args_str):
             char = args_str[i]
             
-            if char == '(':
-                paren_count += 1
+            # Обработка строковых литералов
+            if not in_string and (char == '"' or char == "'"):
+                in_string = True
+                string_char = char
                 current_arg.append(char)
-            elif char == ')':
-                paren_count -= 1
+            elif in_string and char == string_char and args_str[i-1] != '\\':
+                in_string = False
                 current_arg.append(char)
-            elif char == '[':
-                bracket_count += 1
+            elif in_string:
                 current_arg.append(char)
-            elif char == ']':
-                bracket_count -= 1
-                current_arg.append(char)
-            elif char == '{':
-                brace_count += 1
-                current_arg.append(char)
-            elif char == '}':
-                brace_count -= 1
-                current_arg.append(char)
-            elif char == ',' and paren_count == 0 and bracket_count == 0 and brace_count == 0:
-                arg_parts.append(''.join(current_arg).strip())
-                current_arg = []
             else:
-                current_arg.append(char)
+                # Обработка скобок
+                if char == '(':
+                    paren_count += 1
+                    current_arg.append(char)
+                elif char == ')':
+                    paren_count -= 1
+                    current_arg.append(char)
+                elif char == '[':
+                    bracket_count += 1
+                    current_arg.append(char)
+                elif char == ']':
+                    bracket_count -= 1
+                    current_arg.append(char)
+                elif char == '{':
+                    brace_count += 1
+                    current_arg.append(char)
+                elif char == '}':
+                    brace_count -= 1
+                    current_arg.append(char)
+                elif char == ',' and paren_count == 0 and bracket_count == 0 and brace_count == 0:
+                    arg_parts.append(''.join(current_arg).strip())
+                    current_arg = []
+                else:
+                    current_arg.append(char)
             
             i += 1
         
@@ -877,7 +956,9 @@ class SimpleParser:
                 ))
         
         return args
-
+    
+   
+    
     def _parse_function_call(self, line: str, line_num: int) -> Optional[ASTNode]:
         """Парсинг вызова функции (может быть частью выражения)"""
         line = line.strip()
@@ -910,9 +991,9 @@ class SimpleParser:
         return node
     
     def _parse_for_statement(self, lines: List[str], line_num: int, 
-                        file_name: str) -> Tuple[Optional[ASTNode], int]:
+                    file_name: str) -> Tuple[Optional[ASTNode], int]:
         """Разбор оператора for"""
-        print(f"    [DEBUG] Parsing FOR statement at line {line_num}")
+        print(f"\n    [DEBUG] Parsing FOR statement at line {line_num}")
         print(f"      First line: '{lines[0]}'")
         
         # Собираем весь текст for оператора
@@ -943,19 +1024,14 @@ class SimpleParser:
                     elif char == '}':
                         brace_count -= 1
             
-            # Завершаем сбор, когда:
-            # 1. Нашли for
-            # 2. Все скобки for закрыты (paren_count == 0)
-            # 3. Тело цикла полностью (brace_count == 0) или нет тела (brace_count == 0 и мы прошли достаточно строк)
+            # Завершаем сбор, когда все скобки закрыты
             if found_for and paren_count == 0 and brace_count == 0 and i > 0:
-                # Проверяем, что у нас есть хотя бы одна строка после for
                 break
         
-        full_text = ' '.join(full_text_lines).strip()
+        full_text = '\n'.join(full_text_lines).strip()
         print(f"      Full for text: '{full_text}'")
         
         # Извлекаем содержимое for
-        # Ищем: for ( ... ) { ... }
         for_match = re.search(r'for\s*\((.*?)\)\s*(.*)', full_text, re.DOTALL)
         
         if not for_match:
@@ -1003,8 +1079,6 @@ class SimpleParser:
         
         # Должно быть ровно 3 части
         if len(parts) < 3:
-            # Если частей меньше 3, дополняем пустыми строками
-            print(f"      Warning: only {len(parts)} parts, padding to 3")
             while len(parts) < 3:
                 parts.append("")
         
@@ -1017,91 +1091,38 @@ class SimpleParser:
         # Создаем узел for
         for_node = ASTNode(type='for_statement', line=line_num, column=1)
         
-        # ВАЖНО: находим реальные позиции в исходном тексте
-        open_paren_pos = full_text.find('(')
-        close_paren_pos = full_text.find(')', open_paren_pos)
-        
-        if open_paren_pos == -1 or close_paren_pos == -1:
-            self.errors.append(ParsingError(
-                file_name=file_name,
-                line=line_num,
-                column=1,
-                message="Некорректный оператор for: отсутствуют скобки"
-            ))
-            return None, lines_consumed
-        
-        # Добавляем init с ПРАВИЛЬНОЙ структурой
+        # Добавляем init
         if init_expr:
-            # Ищем позицию init выражения
-            init_start = full_text.find(init_expr, open_paren_pos)
-            if init_start == -1:
-                init_start = open_paren_pos + 1
-            
-            init_node = ASTNode(type='init', line=line_num, column=init_start + 1)
-            # Создаем expression узел как дочерний
-            expr_node = ASTNode(
+            init_node = ASTNode(type='init', line=line_num, column=full_text.find(init_expr) + 1)
+            init_node.children.append(ASTNode(
                 type='expression',
                 value=init_expr,
                 line=line_num,
-                column=init_start + 1
-            )
-            init_node.children.append(expr_node)  # ВАЖНО: добавляем как ребенка
+                column=full_text.find(init_expr) + 1
+            ))
             for_node.children.append(init_node)
-            print(f"      Added init node with expression: '{init_expr}'")
         
-        # Добавляем condition с ПРАВИЛЬНОЙ структурой
+        # Добавляем condition
         if condition_expr:
-            # Ищем позицию condition
-            cond_start = full_text.find(condition_expr)
-            if cond_start == -1:
-                # Ищем после первого ;
-                first_semicolon = for_parts_str.find(';')
-                if first_semicolon != -1:
-                    cond_start = open_paren_pos + first_semicolon + 1
-                else:
-                    cond_start = open_paren_pos + len(init_expr) + 1
-            
-            cond_node = ASTNode(type='condition', line=line_num, column=cond_start + 1)
-            # Создаем expression узел как дочерний
-            expr_node = ASTNode(
+            cond_node = ASTNode(type='condition', line=line_num, column=full_text.find(condition_expr) + 1)
+            cond_node.children.append(ASTNode(
                 type='expression',
                 value=condition_expr,
                 line=line_num,
-                column=cond_start + 1
-            )
-            cond_node.children.append(expr_node)  # ВАЖНО: добавляем как ребенка
+                column=full_text.find(condition_expr) + 1
+            ))
             for_node.children.append(cond_node)
-            print(f"      Added condition node with expression: '{condition_expr}'")
         
-        # Добавляем increment с ПРАВИЛЬНОЙ структурой
+        # Добавляем increment
         if increment_expr:
-            # Ищем позицию increment
-            inc_start = full_text.find(increment_expr)
-            if inc_start == -1:
-                # Ищем после второго ;
-                semicolon_count = 0
-                pos = 0
-                while pos < len(for_parts_str) and semicolon_count < 2:
-                    if for_parts_str[pos] == ';':
-                        semicolon_count += 1
-                    pos += 1
-                
-                if semicolon_count == 2:
-                    inc_start = open_paren_pos + pos
-                else:
-                    inc_start = close_paren_pos - len(increment_expr)
-            
-            inc_node = ASTNode(type='increment', line=line_num, column=inc_start + 1)
-            # Создаем expression узел как дочерний
-            expr_node = ASTNode(
+            inc_node = ASTNode(type='increment', line=line_num, column=full_text.find(increment_expr) + 1)
+            inc_node.children.append(ASTNode(
                 type='expression',
                 value=increment_expr,
                 line=line_num,
-                column=inc_start + 1
-            )
-            inc_node.children.append(expr_node)  # ВАЖНО: добавляем как ребенка
+                column=full_text.find(increment_expr) + 1
+            ))
             for_node.children.append(inc_node)
-            print(f"      Added increment node with expression: '{increment_expr}'")
         
         # Обрабатываем тело
         if body_text:
@@ -1124,32 +1145,58 @@ class SimpleParser:
                     body_text = body_text[1:body_end_pos-1].strip()
                 else:
                     body_text = body_text[1:].strip()
-            else:
-                # Тело без скобок - одна строка
-                pass
+            
+            print(f"      Body text after processing: '{body_text}'")
             
             if body_text:
-                # Находим позицию тела
-                body_start_pos = full_text.find(body_text)
-                if body_start_pos == -1:
-                    body_start_pos = close_paren_pos + 1
-                
-                body_node = ASTNode(type='body', line=line_num, column=body_start_pos + 1)
+                body_node = ASTNode(type='body', line=line_num, column=full_text.find(body_text) + 1)
                 
                 # Парсим тело как список statements
+                print(f"      Calling _parse_statement_list")
                 body_statements = self._parse_statement_list(body_text, line_num + 1, file_name)
+                print(f"      Parsed {len(body_statements)} statements")
+                
                 for stmt in body_statements:
                     body_node.children.append(stmt)
                 
                 for_node.children.append(body_node)
                 print(f"      Added body with {len(body_statements)} statements")
+            else:
+                print(f"      Empty body after processing")
+                # Добавляем пустое тело
+                body_node = ASTNode(type='body', line=line_num, column=full_text.find('{') + 2)
+                for_node.children.append(body_node)
+        else:
+            print(f"      No body text")
         
         print(f"      FOR statement complete, total lines consumed: {lines_consumed}")
         print(f"      For node has {len(for_node.children)} children")
-        for i, child in enumerate(for_node.children):
-            print(f"        Child {i}: type={child.type}, has {len(child.children)} sub-children")
-            if child.children:
-                for j, subchild in enumerate(child.children):
-                    print(f"          Subchild {j}: type={subchild.type}, value={subchild.value}")
         
         return for_node, lines_consumed
+    
+    def _extract_condition(self, line: str) -> Optional[str]:
+        """Извлекает полное условие из if/while с учетом вложенных скобок"""
+        if not line.strip().startswith(('if ', 'while ')):
+            return None
+        
+        # Находим начало условия
+        open_paren_pos = line.find('(')
+        if open_paren_pos == -1:
+            return None
+        
+        # Ищем парную закрывающую скобку
+        paren_count = 0
+        i = open_paren_pos
+        
+        while i < len(line):
+            char = line[i]
+            if char == '(':
+                paren_count += 1
+            elif char == ')':
+                paren_count -= 1
+                if paren_count == 0:
+                    # Нашли парную закрывающую скобку
+                    return line[open_paren_pos + 1:i].strip()
+            i += 1
+        
+        return None

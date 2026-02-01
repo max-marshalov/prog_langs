@@ -1,0 +1,26 @@
+function fib(n -> int) -> int{
+    if (n == 0){
+        return n;
+    }
+    if (n == 1){
+        return n;
+    }
+    else {
+            t1 -> int;
+            t2 -> int;
+            t1 = n - 1;
+            t2 = n - 2;
+            return fib(t1) + fib(t2);
+        }
+    
+    
+}
+
+function main() -> int {
+    a -> int;
+    result -> int;
+    printf("fib value: ");
+    scanf("%d", a);
+    result = fib(a);
+    printf("%d\n", result);
+}

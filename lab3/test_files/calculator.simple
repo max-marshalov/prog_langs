@@ -1,0 +1,36 @@
+function main() -> int {
+    num1 -> int;
+    num2 -> int;
+    op -> char;
+    result -> int;
+    
+    // Ввод выражения
+    while (1) {
+        printf("Enter expression: ");
+        scanf("%d %c %d", num1, op, num2);
+    
+        // Вычисление результата
+        if (op == '+') {
+            result = num1 + num2;
+        } 
+        else {
+            if (op == '-') {
+                result = num1 - num2
+            }
+            else {
+                if (op == '*'){
+                    result = num1 * num2;
+                }
+                else{
+                    if (op == '/'){
+                        result = num1 / num2;
+                    }
+                }
+            }
+        }
+
+        
+        printf("result: %d\n", result);
+    }
+    
+}

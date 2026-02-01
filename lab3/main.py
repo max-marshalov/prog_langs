@@ -3,13 +3,16 @@ import sys
 import os
 from pathlib import Path
 
+from generators.x86_gen import x86AsmGenerator
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from ast_parser import SimpleParser
 from control_flow import ControlFlowBuilder
 from visualizer import GraphVisualizer, HAS_GRAPHVIZ
 
-def process_file(file_path: str, output_dir: str = ".") -> bool:
+def process_file(file_path: str, output_dir: str = ".", generate_asm = False) -> bool:
+    
     if not os.path.exists(file_path):
         print(f"Ошибка: файл '{file_path}' не найден")
         return False
@@ -24,6 +27,28 @@ def process_file(file_path: str, output_dir: str = ".") -> bool:
         
         cfg_builder = ControlFlowBuilder()
         functions = cfg_builder.build_from_ast(file_path, ast)
+
+        if parser.errors or cfg_builder.errors:
+            print(f"  Обнаружены ошибки {parser.errors}, {cfg_builder.errors}, граф не будет построен")
+            return False
+        # Генерация ассемблерного кода
+        if generate_asm and functions:
+                asm_generator = x86AsmGenerator()
+                asm_code = asm_generator.generate_program(functions)
+                
+                source_name = Path(file_path).stem
+                asm_file = Path(output_dir) / f"{source_name}.asm"
+                
+                with open(asm_file, 'w', encoding='utf-8') as f:
+                    f.write(asm_code)
+                
+                print(f"  Ассемблерный код сохранен в: {asm_file}")
+                print(f"\n  Для сборки выполните:")
+                print(f"    nasm -f win64 {source_name}.asm")
+                print(f"    gcc {source_name}.obj -o {source_name}.exe")
+                print(f"    {source_name}.exe")
+                
+                
         if HAS_GRAPHVIZ:
             source_name = Path(file_path).stem
             output_file = Path(output_dir) / f"{source_name}.png"
@@ -91,6 +116,7 @@ def main():
         sys.exit(1)
     input_files = []
     output_dir = "."
+    generate_asm = True
     
     i = 1
     while i < len(sys.argv):
@@ -113,7 +139,7 @@ def main():
     
     success_count = 0
     for file_path in input_files:
-        if process_file(file_path, output_dir):
+        if process_file(file_path, output_dir, generate_asm):
             success_count += 1
         print()
     

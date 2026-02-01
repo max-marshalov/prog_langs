@@ -1,7 +1,9 @@
-function max(a, b) -> int {
-    if (a > b) {
-        return a;
+function sum(n -> int) -> int{
+    a + B;
+    if (n == 1){
+        return n;
     }
-    return b;
-    
+    else {
+        return n + sum(n - 1);
+    }
 }

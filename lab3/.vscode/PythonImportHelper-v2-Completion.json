@@ -1,0 +1,527 @@
+[
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Set",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Tuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Tuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Tuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Set",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Set",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "FunctionInfo",
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "isExtraImport": true,
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "Operation",
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "isExtraImport": true,
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "OperationType",
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "isExtraImport": true,
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "VariableInfo",
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "isExtraImport": true,
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "TypeSystem",
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "isExtraImport": true,
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "BasicBlock",
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "isExtraImport": true,
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "ASTNode",
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "isExtraImport": true,
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "ParsingError",
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "isExtraImport": true,
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "ControlFlowBuilder",
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "isExtraImport": true,
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "ControlFlowGraph",
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "isExtraImport": true,
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "BasicBlock",
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "isExtraImport": true,
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "FunctionInfo",
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "isExtraImport": true,
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "Operation",
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "isExtraImport": true,
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "OperationType",
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "isExtraImport": true,
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "Enum",
+        "importPath": "enum",
+        "description": "enum",
+        "isExtraImport": true,
+        "detail": "enum",
+        "documentation": {}
+    },
+    {
+        "label": "BuiltinFunctions",
+        "importPath": "port.builtin_functions",
+        "description": "port.builtin_functions",
+        "isExtraImport": true,
+        "detail": "port.builtin_functions",
+        "documentation": {}
+    },
+    {
+        "label": "TypeSystem",
+        "importPath": "port.type_system",
+        "description": "port.type_system",
+        "isExtraImport": true,
+        "detail": "port.type_system",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "x86AsmGenerator",
+        "importPath": "generators.x86_gen",
+        "description": "generators.x86_gen",
+        "isExtraImport": true,
+        "detail": "generators.x86_gen",
+        "documentation": {}
+    },
+    {
+        "label": "SimpleParser",
+        "importPath": "ast_parser",
+        "description": "ast_parser",
+        "isExtraImport": true,
+        "detail": "ast_parser",
+        "documentation": {}
+    },
+    {
+        "label": "GraphVisualizer",
+        "importPath": "visualizer",
+        "description": "visualizer",
+        "isExtraImport": true,
+        "detail": "visualizer",
+        "documentation": {}
+    },
+    {
+        "label": "HAS_GRAPHVIZ",
+        "importPath": "visualizer",
+        "description": "visualizer",
+        "isExtraImport": true,
+        "detail": "visualizer",
+        "documentation": {}
+    },
+    {
+        "label": "x86AsmGenerator",
+        "kind": 6,
+        "importPath": "generators.x86_gen",
+        "description": "generators.x86_gen",
+        "peekOfCode": "class x86AsmGenerator:\n    \"\"\"Генератор ассемблерного кода x86-64\"\"\"\n    def __init__(self):\n        self.string_constants: Dict[str, int] = {}\n        self.next_const_id = 0\n        self.var_offsets: Dict[str, int] = {}\n        self.label_counter = 0\n        self.functions: List[FunctionInfo] = []  # Список всех функций\n    def _escape_string_for_nasm(self, string: str) -> str:\n        \"\"\"Экранирует строку для NASM, сохраняя строки как единые литералы\"\"\"",
+        "detail": "generators.x86_gen",
+        "documentation": {}
+    },
+    {
+        "label": "BuiltinFunctions",
+        "kind": 6,
+        "importPath": "port.builtin_functions",
+        "description": "port.builtin_functions",
+        "peekOfCode": "class BuiltinFunctions:\n    \"\"\"Информация о встроенных функциях\"\"\"\n    STANDARD_FUNCTIONS = {\n        'printf': {\n            'return_type': 'int',\n            'parameters': [('format', 'string')],\n            'variadic': True  # может принимать переменное число аргументов\n        },\n        'scanf': {\n            'return_type': 'int',",
+        "detail": "port.builtin_functions",
+        "documentation": {}
+    },
+    {
+        "label": "TypeSystem",
+        "kind": 6,
+        "importPath": "port.type_system",
+        "description": "port.type_system",
+        "peekOfCode": "class TypeSystem:\n    \"\"\"Система типов для языка\"\"\"\n    # Базовые типы\n    BUILTIN_TYPES = {\n        'int': {\n            'size': 4,\n            'signed': True,\n            'asm_prefix': 'dword',\n            'register_size': 32,\n        },",
+        "detail": "port.type_system",
+        "documentation": {}
+    },
+    {
+        "label": "SimpleParser",
+        "kind": 6,
+        "importPath": "ast_parser",
+        "description": "ast_parser",
+        "peekOfCode": "class SimpleParser:\n    def __init__(self):\n        self.errors: List[ParsingError] = []\n        self.current_line = 0\n        self.current_column = 0\n        self.debug = True\n    def parse_file(self, file_name: str, source_code: str) -> ASTNode:\n        \"\"\"Парсинг исходного кода файла\"\"\"\n        self.errors.clear()\n        lines = self._remove_comments(source_code)",
+        "detail": "ast_parser",
+        "documentation": {}
+    },
+    {
+        "label": "OperationType",
+        "kind": 6,
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "peekOfCode": "class OperationType(Enum):\n    \"\"\"Типы операций\"\"\"\n    DECLARE = \"declare\"\n    ASSIGN = \"assign\"\n    ADD = \"add\"\n    SUB = \"sub\"\n    MUL = \"mul\"\n    DIV = \"div\"\n    MOD = \"mod\"\n    EQ = \"eq\"",
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "Operation",
+        "kind": 6,
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "peekOfCode": "class Operation:\n    type: OperationType\n    value: Optional[str] = None\n    left: Optional['Operation'] = None\n    right: Optional['Operation'] = None\n    args: List['Operation'] = field(default_factory=list)\n    line: int = 0\n    column: int = 0\n    var_type: Optional[str] = None  # Тип переменной/операции\n    result_type: Optional[str] = None  # Тип результата операции",
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "BasicBlock",
+        "kind": 6,
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "peekOfCode": "class BasicBlock:\n    id: int\n    operations: List[Operation] = field(default_factory=list)\n    true_branch: Optional['BasicBlock'] = None\n    false_branch: Optional['BasicBlock'] = None\n    next_block: Optional['BasicBlock'] = None\n    is_loop_start: bool = False\n    is_loop_end: bool = False\n@dataclass\nclass ControlFlowGraph:",
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "ControlFlowGraph",
+        "kind": 6,
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "peekOfCode": "class ControlFlowGraph:\n    entry_block: BasicBlock\n    exit_block: BasicBlock\n    blocks: List[BasicBlock] = field(default_factory=list)\n    def add_block(self, block: BasicBlock):\n        self.blocks.append(block)\n@dataclass\nclass VariableInfo:\n    \"\"\"Информация о переменной\"\"\"\n    name: str",
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "VariableInfo",
+        "kind": 6,
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "peekOfCode": "class VariableInfo:\n    \"\"\"Информация о переменной\"\"\"\n    name: str\n    type: str\n    declared_at_line: int\n    initialized: bool = False\n    scope_level: int = 0\n    offset: int = 0  # смещение в стековом фрейме\n    is_param: bool = False\n@dataclass",
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "SymbolTable",
+        "kind": 6,
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "peekOfCode": "class SymbolTable:\n    \"\"\"Таблица символов (область видимости)\"\"\"\n    variables: Dict[str, VariableInfo] = field(default_factory=dict)\n    parent: Optional['SymbolTable'] = None\n    scope_name: str = \"\"\n    def add_variable(self, name: str, var_type: str, line: int, \n                    is_param: bool = False, offset: int = 0) -> VariableInfo:\n        \"\"\"Добавляет переменную в таблицу символов\"\"\"\n        var_info = VariableInfo(\n            name=name,",
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "FunctionInfo",
+        "kind": 6,
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "peekOfCode": "class FunctionInfo:\n    name: str\n    signature: Dict[str, Any]\n    cfg: ControlFlowGraph\n    source_file: str\n    operations_tree: Optional[Any] = None\n    return_type: str = \"void\"\n    parameters: List[Tuple[str, str]] = field(default_factory=list)\n    symbol_table: SymbolTable = field(default_factory=lambda: SymbolTable(scope_name=\"global\"))\n    local_vars_size: int = 0",
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "ParsingError",
+        "kind": 6,
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "peekOfCode": "class ParsingError:\n    file_name: str\n    line: int\n    column: int\n    message: str\n    severity: str = \"error\"\n@dataclass\nclass ASTNode:\n    type: str\n    value: Optional[str] = None",
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "ASTNode",
+        "kind": 6,
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "peekOfCode": "class ASTNode:\n    type: str\n    value: Optional[str] = None\n    children: List['ASTNode'] = field(default_factory=list)\n    line: int = 0\n    column: int = 0\n    attributes: Dict[str, Any] = field(default_factory=dict)\nclass ControlFlowBuilder:\n    \"\"\"Построитель графа потока управления с системой типов\"\"\"\n    def __init__(self):",
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "ControlFlowBuilder",
+        "kind": 6,
+        "importPath": "control_flow",
+        "description": "control_flow",
+        "peekOfCode": "class ControlFlowBuilder:\n    \"\"\"Построитель графа потока управления с системой типов\"\"\"\n    def __init__(self):\n        self.functions: List[FunctionInfo] = []\n        self.errors: List[ParsingError] = []\n        self.current_block_id = 0\n        self.call_graph: Dict[str, Set[str]] = {}\n        # Текущий контекст анализа\n        self.current_function_name: Optional[str] = None\n        self.current_file_name: Optional[str] = None",
+        "detail": "control_flow",
+        "documentation": {}
+    },
+    {
+        "label": "process_file",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def process_file(file_path: str, output_dir: str = \".\", generate_asm = False) -> bool:\n    if not os.path.exists(file_path):\n        print(f\"Ошибка: файл '{file_path}' не найден\")\n        return False\n    try:\n        with open(file_path, 'r', encoding='utf-8') as f:\n            source_code = f.read()\n        parser = SimpleParser()\n        ast = parser.parse_file(file_path, source_code)\n        cfg_builder = ControlFlowBuilder()",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def main():\n    if len(sys.argv) < 2:\n        print(\"Использование: python main.py <файл1> [файл2 ...]\")\n        sys.exit(1)\n    input_files = []\n    output_dir = \".\"\n    generate_asm = True\n    i = 1\n    while i < len(sys.argv):\n        arg = sys.argv[i]",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "generate_simple_windows_asm",
+        "kind": 2,
+        "importPath": "t_asm",
+        "description": "t_asm",
+        "peekOfCode": "def generate_simple_windows_asm() -> str:\n    \"\"\"Генерирует простой рабочий ассемблерный код для Windows\"\"\"\n    return '''\n; Простой калькулятор для Windows x64\n; nasm -f win64 calculator.asm\n; gcc calculator.obj -o calculator.exe\ndefault rel\nglobal main\nextern printf, scanf, exit\nsection .data",
+        "detail": "t_asm",
+        "documentation": {}
+    },
+    {
+        "label": "GraphVisualizer",
+        "kind": 6,
+        "importPath": "visualizer",
+        "description": "visualizer",
+        "peekOfCode": "class GraphVisualizer:\n    @staticmethod\n    def _sanitize_id(name: str) -> str:\n        sanitized = re.sub(r'[^a-zA-Z0-9_]', '_', name)\n        if sanitized and sanitized[0].isdigit():\n            sanitized = 'n' + sanitized\n        return sanitized\n    @staticmethod\n    def visualize_single_file(functions: List[FunctionInfo], source_filename: str) -> graphviz.Digraph:\n        if not HAS_GRAPHVIZ:",
+        "detail": "visualizer",
+        "documentation": {}
+    }
+]

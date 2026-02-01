@@ -1,0 +1,10 @@
+function main() -> int {
+    a ->  int;
+    while (1) {
+        printf("Enter value: ");
+        scanf("%d", a);
+        printf("%d\n", a);
+    }
+    
+
+}

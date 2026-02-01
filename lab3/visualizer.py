@@ -154,30 +154,45 @@ class GraphVisualizer:
         
         return dot
     
+
     @staticmethod
     def _operation_to_compact_str(op: Operation, index: int) -> str:
         result = f"#{index}: {op.type.name}"
-    
+        
+        # Добавляем информацию о типах в квадратных скобках
+        type_parts = []
+        if op.var_type and op.var_type != "unknown":
+            type_parts.append(f"var:{op.var_type}")
+        if op.result_type and op.result_type != "unknown":
+            type_parts.append(f"res:{op.result_type}")
+        
+        if type_parts:
+            result += f" [{', '.join(type_parts)}]"
+        
         if op.type == OperationType.DECLARE:
             if op.value:
                 result += f" {op.value}"
                 if op.var_type:
-                    result += f" -> {op.var_type}"
+                    result += f":{op.var_type}"
                 if op.left:
-                    init_val = GraphVisualizer._operand_to_structural(op.left)
+                    init_val = GraphVisualizer._operand_to_str_with_type(op.left)
                     result += f" = {init_val}"
         
         elif op.type == OperationType.ASSIGN:
             if op.left and op.right:
-                left = GraphVisualizer._operand_to_simple(op.left)
-                right = GraphVisualizer._operand_to_structural(op.right) 
-                result += f" {left} = {right}"
+                left_str = GraphVisualizer._operand_to_structural(op.left)
+                right_str = GraphVisualizer._operand_to_str_with_type(op.right)
+                left_type = op.left.var_type or op.left.result_type or "?"
+                if f":{left_type}" not in left_str:
+                    left_str = f"{left_str}:{left_type}"
+                result += f" {left_str} = {right_str}"
         
         elif op.type == OperationType.CALL:
             if op.value:
                 args = []
                 for arg in op.args:
-                    args.append(GraphVisualizer._operand_to_structural(arg))
+                    args.append(GraphVisualizer._operand_to_str_with_type(arg))
+                
                 if args:
                     result += f" {op.value}({', '.join(args)})"
                 else:
@@ -185,108 +200,70 @@ class GraphVisualizer:
         
         elif op.type == OperationType.RETURN:
             if op.left:
-                val = GraphVisualizer._operand_to_structural(op.left)
+                val = GraphVisualizer._operand_to_str_with_type(op.left)
                 result += f" {val}"
         
         elif op.type == OperationType.INCREMENT:
-            # Проверяем разные способы хранения переменной
-            variable_name = None
-            
-            # Способ 1: в поле value
             if op.value:
-                variable_name = op.value
-            # Способ 2: в левом операнде
-            elif op.left and op.left.value:
-                variable_name = op.left.value
-            # Способ 3: в левом операнде типа NOOP
-            elif op.left and op.left.type == OperationType.NOOP and op.left.value:
-                variable_name = op.left.value
-            
-            if variable_name:
-                # Проверяем, префиксный или постфиксный
-                if hasattr(op, 'attributes') and op.attributes.get('prefix'):
-                    result += f" ++{variable_name}"
+                var_type = op.var_type or op.result_type or "?"
+                if var_type and var_type != "unknown":
+                    type_info = f":{var_type}"
                 else:
-                    result += f" {variable_name}++"
+                    type_info = ""
+                
+                if hasattr(op, 'attributes') and op.attributes.get('prefix'):
+                    result += f" ++{op.value}{type_info}"
+                else:
+                    result += f" {op.value}++{type_info}"
             else:
                 result += f" <increment>"
         
         elif op.type == OperationType.DECREMENT:
-            # Проверяем разные способы хранения переменной
-            variable_name = None
-            
-            # Способ 1: в поле value
             if op.value:
-                variable_name = op.value
-            # Способ 2: в левом операнде
-            elif op.left and op.left.value:
-                variable_name = op.left.value
-            # Способ 3: в левом операнде типа NOOP
-            elif op.left and op.left.type == OperationType.NOOP and op.left.value:
-                variable_name = op.left.value
-            
-            if variable_name:
-                # Проверяем, префиксный или постфиксный
-                if hasattr(op, 'attributes') and op.attributes.get('prefix'):
-                    result += f" --{variable_name}"
+                var_type = op.var_type or op.result_type or "?"
+                if var_type and var_type != "unknown":
+                    type_info = f":{var_type}"
                 else:
-                    result += f" {variable_name}--"
+                    type_info = ""
+                
+                if hasattr(op, 'attributes') and op.attributes.get('prefix'):
+                    result += f" --{op.value}{type_info}"
+                else:
+                    result += f" {op.value}--{type_info}"
             else:
                 result += f" <decrement>"
         
-        elif op.type == OperationType.ADD:
+        elif op.type in [OperationType.ADD, OperationType.SUB, OperationType.MUL,
+                        OperationType.DIV, OperationType.MOD]:
             if op.left and op.right:
-                left = GraphVisualizer._operand_to_structural(op.left)
-                right = GraphVisualizer._operand_to_structural(op.right)
-                result += f" ADD({left}, {right})"
-        
-        elif op.type == OperationType.SUB:
-            if op.left and op.right:
-                left = GraphVisualizer._operand_to_structural(op.left)
-                right = GraphVisualizer._operand_to_structural(op.right)
-                result += f" SUB({left}, {right})"
-        
-        elif op.type == OperationType.MUL:
-            if op.left and op.right:
-                left = GraphVisualizer._operand_to_structural(op.left)
-                right = GraphVisualizer._operand_to_structural(op.right)
-                result += f" MUL({left}, {right})"
-        
-        elif op.type == OperationType.DIV:
-            if op.left and op.right:
-                left = GraphVisualizer._operand_to_structural(op.left)
-                right = GraphVisualizer._operand_to_structural(op.right)
-                result += f" DIV({left}, {right})"
-        
-        elif op.type == OperationType.MOD:
-            if op.left and op.right:
-                left = GraphVisualizer._operand_to_structural(op.left)
-                right = GraphVisualizer._operand_to_structural(op.right)
-                result += f" MOD({left}, {right})"
+                left_str = GraphVisualizer._operand_to_str_with_type(op.left)
+                right_str = GraphVisualizer._operand_to_str_with_type(op.right)
+                op_symbol = GraphVisualizer._get_operator_symbol(op.type)
+                result += f" {left_str}{op_symbol}{right_str}"
         
         elif op.type in [OperationType.EQ, OperationType.NE, OperationType.LT,
                         OperationType.LE, OperationType.GT, OperationType.GE]:
             if op.left and op.right:
-                left = GraphVisualizer._operand_to_structural(op.left)
-                right = GraphVisualizer._operand_to_structural(op.right)
+                left_str = GraphVisualizer._operand_to_str_with_type(op.left)
+                right_str = GraphVisualizer._operand_to_str_with_type(op.right)
                 op_symbol = GraphVisualizer._get_operator_symbol(op.type)
-                result += f" {left}{op_symbol}{right}"
+                result += f" {left_str}{op_symbol}{right_str}"
         
         elif op.type in [OperationType.AND, OperationType.OR]:
             if op.left and op.right:
-                left = GraphVisualizer._operand_to_structural(op.left)
-                right = GraphVisualizer._operand_to_structural(op.right)
+                left_str = GraphVisualizer._operand_to_str_with_type(op.left)
+                right_str = GraphVisualizer._operand_to_str_with_type(op.right)
                 op_symbol = GraphVisualizer._get_operator_symbol(op.type)
-                result += f" {left}{op_symbol}{right}"
+                result += f" {left_str}{op_symbol}{right_str}"
         
         elif op.type == OperationType.NOT:
             if op.left:
-                val = GraphVisualizer._operand_to_structural(op.left)
+                val = GraphVisualizer._operand_to_str_with_type(op.left)
                 result += f" !{val}"
         
         elif op.type == OperationType.CONDITION:
             if op.left:
-                cond = GraphVisualizer._operand_to_structural(op.left)
+                cond = GraphVisualizer._operand_to_str_with_type(op.left)
                 result += f" {cond}"
         
         elif op.type in [OperationType.BREAK, OperationType.CONTINUE, OperationType.NOOP,
@@ -409,7 +386,11 @@ class GraphVisualizer:
             return "?"
         
         if isinstance(operand, Operation):
-            if operand.type == OperationType.INCREMENT:
+            if hasattr(operand, 'var_type') and operand.var_type:
+                if operand.type == OperationType.NOOP:
+                    return f"{operand.value}:{operand.var_type}"
+                
+            elif operand.type == OperationType.INCREMENT:
                 if operand.value:
                     if hasattr(operand, 'attributes') and operand.attributes.get('prefix'):
                         return f"++{operand.value}"
@@ -532,3 +513,24 @@ class GraphVisualizer:
             elif op.right.type == OperationType.NOOP and op.right.value and op.right.value != '1':
                 return op.right.value
         return None
+    
+    @staticmethod
+    def _operand_to_str_with_type(operand) -> str:
+        """Возвращает строковое представление операнда с типом если нужно"""
+        if operand is None:
+            return "?"
+        
+        base_str = GraphVisualizer._operand_to_structural(operand)
+        
+        # Получаем тип операнда
+        op_type = None
+        if hasattr(operand, 'result_type') and operand.result_type and operand.result_type != "unknown":
+            op_type = operand.result_type
+        elif hasattr(operand, 'var_type') and operand.var_type and operand.var_type != "unknown":
+            op_type = operand.var_type
+        
+        # Добавляем тип только если он еще не присутствует в строке
+        if op_type and f":{op_type}" not in base_str:
+            return f"{base_str}:{op_type}"
+        
+        return base_str
