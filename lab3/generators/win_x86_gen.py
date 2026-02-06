@@ -2,7 +2,7 @@ import re
 from typing import List, Dict, Optional, Any, Set, Tuple
 from control_flow import FunctionInfo, Operation, OperationType, VariableInfo, TypeSystem, BasicBlock
 
-class x86AsmGenerator:
+class WinX86AsmGenerator:
     """Генератор ассемблерного кода x86-64"""
     
     def __init__(self):
@@ -17,11 +17,9 @@ class x86AsmGenerator:
         if not string:
             return '0'
         
-        # Для отладки
-        print(f"DEBUG: Escaping string: '{string}' (repr: {repr(string)}, len: {len(string)})")
         
-        # Если строка состоит только из печатных ASCII символов без спецсимволов,
-        # можем вывести её как единый литерал
+        
+        
         def is_printable_ascii(char):
             code = ord(char)
             return 32 <= code <= 126  # Печатные ASCII
@@ -29,7 +27,7 @@ class x86AsmGenerator:
         def needs_escape_in_string(char):
             return char in ('"', '\\', '\n', '\r', '\t')
         
-        # Проверяем, можно ли вывести строку как единый литерал
+        
         can_be_single_literal = True
         for char in string:
             if not is_printable_ascii(char) or needs_escape_in_string(char):
@@ -37,11 +35,11 @@ class x86AsmGenerator:
                 break
         
         if can_be_single_literal:
-            # Простая строка - выводим как единый литерал
+            
             escaped = string.replace('\\', '\\\\').replace('"', '\\"')
             return f'"{escaped}"'
         
-        # Сложная строка - обрабатываем посимвольно или группами
+        
         result_parts = []
         current_part = []
         
@@ -49,7 +47,7 @@ class x86AsmGenerator:
         while i < len(string):
             char = string[i]
             
-            # Проверяем, является ли символ частью последовательной печатной строки
+            
             if is_printable_ascii(char) and not needs_escape_in_string(char):
                 # Начинаем собирать группу печатных символов
                 group_start = i
@@ -107,10 +105,6 @@ class x86AsmGenerator:
             self._collect_strings_from_function(func)
         
         asm_lines = [
-            '; Calculator - Generated from your code',
-            '; For Windows x64',
-            '; Build: nasm -f win64 calculator.asm && gcc calculator.obj -o calculator.exe',
-            '',
             'default rel',
             'global main',
             'extern printf, scanf, exit, _getch',
@@ -174,11 +168,11 @@ class x86AsmGenerator:
     
     def _generate_function_asm(self, func: FunctionInfo) -> List[str]:
         """Генерирует ассемблерный код для функции на основе CFG"""
-        print(f"\nDEBUG: Generating function '{func.name}' from CFG")
+
         
         # Собираем все переменные из таблицы символов
         local_vars = self._collect_local_variables(func)
-        print(f"DEBUG: Local variables for {func.name}: {local_vars}")
+
         
         # Создаем смещения для переменных
         self.var_offsets = self._calculate_var_offsets(func, local_vars)
@@ -216,8 +210,7 @@ class x86AsmGenerator:
             for var_name, var_info in func.symbol_table.variables.items():
                 local_vars[var_name] = var_info.type  # Добавляем все переменные
         
-        print(f"DEBUG _collect_local_variables for {func.name}:")
-        print(f"  From symbol table: {list(local_vars.keys())}")
+
         
         # Также из операций DECLARE в CFG
         if hasattr(func, 'cfg') and hasattr(func.cfg, 'entry_block'):
@@ -238,7 +231,6 @@ class x86AsmGenerator:
                         var_type = op.var_type if op.var_type else 'int'
                         if var_name not in local_vars:
                             local_vars[var_name] = var_type
-                            print(f"  Added from DECLARE op: {var_name} -> {var_type}")
                 
                 if block.next_block:
                     stack.append(block.next_block)
@@ -247,7 +239,6 @@ class x86AsmGenerator:
                 if block.false_branch:
                     stack.append(block.false_branch)
         
-        print(f"  Final variables: {local_vars}")
         return local_vars
     
     def _clean_var_name(self, var_name: str) -> str:
@@ -365,22 +356,8 @@ class x86AsmGenerator:
         # Добавляем метку блока
         lines.append(f'.L{func.name}_block_{block.id}:')
         
-        # Детальная отладка операций в блоке
-        print(f"\nDEBUG BLOCK {block.id} in {func.name}:")
-        for i, op in enumerate(block.operations):
-            print(f"  Op {i}: {op.type.name}")
-            print(f"    Value: {op.value}")
-            if op.left:
-                print(f"    Left: {op.left.type} = {op.left.value if hasattr(op.left, 'value') else 'None'}")
-            if op.right:
-                print(f"    Right: {op.right.type} = {op.right.value if hasattr(op.right, 'value') else 'None'}")
-            if op.args:
-                print(f"    Args: {[arg.value if hasattr(arg, 'value') else arg.type.name for arg in op.args]}")
-        
         # Генерируем ВСЕ операции блока
-        print(f"DEBUG: Processing block {block.id} with {len(block.operations)} operations")
-        for i, op in enumerate(block.operations):
-            print(f"DEBUG:   Operation {i}: {op.type.name}, value={op.value}")
+        for op in block.operations:
             op_lines = self._generate_operation(op, func, local_vars)
             if op_lines:
                 lines.extend(op_lines)
@@ -463,12 +440,6 @@ class x86AsmGenerator:
         """Генерирует код для одной операции"""
         lines = []
         
-        print(f"\nDEBUG GENERATE OP: type={op.type.name}, value={op.value}")
-        if op.left:
-            print(f"  left type: {op.left.type}, value: {op.left.value if hasattr(op.left, 'value') else 'None'}")
-        if op.right:
-            print(f"  right type: {op.right.type}, value: {op.right.value if hasattr(op.right, 'value') else 'None'}")
-        
         if op.type == OperationType.DECLARE:
             var_name = op.value or "?"
             clean_name = self._clean_var_name(var_name)
@@ -512,23 +483,18 @@ class x86AsmGenerator:
         
         elif op.type == OperationType.EQ:
             # Генерация кода для сравнения
-            print(f"  Generating EQ comparison")
             compare_code = self._generate_compare_code(op, func, local_vars)
             if compare_code:
                 lines.extend(compare_code)
         
         elif op.type == OperationType.ASSIGN:
             # Генерация кода для присваивания
-            print(f"  Generating ASSIGN")
             assign_code = self._generate_assign_code(op, func, local_vars)
             if assign_code:
                 lines.extend(assign_code)
         
         elif op.type == OperationType.SUB:
             # Генерация кода для операции вычитания (может быть отдельной операцией)
-            print(f"  Generating SUB operation")
-            print(f"    left: {op.left.value if op.left and hasattr(op.left, 'value') else 'None'}")
-            print(f"    right: {op.right.value if op.right and hasattr(op.right, 'value') else 'None'}")
             
             # Если это отдельная операция (не часть присваивания), генерируем код
             sub_code = self._generate_arithmetic_code(op, func, local_vars)
@@ -537,7 +503,6 @@ class x86AsmGenerator:
         
         elif op.type in [OperationType.ADD, OperationType.MUL, OperationType.DIV]:
             # Генерация кода для арифметических операций
-            print(f"  Generating ARITHMETIC {op.type.name}")
             arith_code = self._generate_arithmetic_code(op, func, local_vars)
             if arith_code:
                 lines.extend(arith_code)
@@ -558,13 +523,12 @@ class x86AsmGenerator:
         """Генерирует код для операции возврата"""
         lines = []
         
-        print(f"DEBUG RETURN in {func.name}: op.left={op.left if op and op.left else 'None'}")
+
         
         if op and op.left:
             # Есть возвращаемое значение
             if op.left.type == OperationType.ADD:
                 # Это выражение типа fib(t1) + fib(t2)
-                print(f"  Processing ADD expression")
                 
                 # Левый операнд - fib(t1)
                 left_operand = op.left.left
@@ -572,13 +536,10 @@ class x86AsmGenerator:
                 right_operand = op.left.right
                 
                 if left_operand and right_operand:
-                    print(f"  Left: {left_operand.type} = {left_operand.value if hasattr(left_operand, 'value') else 'None'}")
-                    print(f"  Right: {right_operand.type} = {right_operand.value if hasattr(right_operand, 'value') else 'None'}")
                     
                     # Генерируем код для левого вызова (fib(t1))
                     if left_operand.type == OperationType.CALL:
                         func_name = left_operand.value
-                        print(f"  Generating left call to {func_name}")
                         
                         # Подготавливаем аргументы
                         if left_operand.args:
@@ -602,7 +563,6 @@ class x86AsmGenerator:
                     # Генерируем код для правого вызова (fib(t2))
                     if right_operand.type == OperationType.CALL:
                         func_name = right_operand.value
-                        print(f"  Generating right call to {func_name}")
                         
                         # Подготавливаем аргументы
                         if right_operand.args:
@@ -750,15 +710,13 @@ class x86AsmGenerator:
         """Генерирует код для операции присваивания"""
         lines = []
         
-        print(f"DEBUG ASSIGN: op.type={op.type.name}, left={op.left}, right={op.right}")
+
         
         if op.left and op.right:
             # Целевая переменная
             dest_var_full = op.left.value if hasattr(op.left, 'value') else None
             dest_var = self._clean_var_name(dest_var_full)
             
-            print(f"  Cleaned dest_var: '{dest_var_full}' -> '{dest_var}'")
-            print(f"  Right operation type: {op.right.type}")
             
             # Если правая часть - вызов функции
             if op.right.type == OperationType.CALL:
@@ -791,7 +749,6 @@ class x86AsmGenerator:
             
             # Если правая часть - операция вычитания (n - 1)
             elif op.right.type == OperationType.SUB:
-                print(f"  Processing SUB assignment: {dest_var} = n - 1")
                 
                 # Генерируем код для вычитания
                 sub_lines = self._generate_arithmetic_code(op.right, func, local_vars)
@@ -808,7 +765,6 @@ class x86AsmGenerator:
                         left_val = op.right.left.value if hasattr(op.right.left, 'value') else None
                         right_val = op.right.right.value if hasattr(op.right.right, 'value') else None
                         
-                        print(f"    left={left_val}, right={right_val}")
                         
                         # Загружаем левый операнд
                         if left_val:
@@ -869,7 +825,7 @@ class x86AsmGenerator:
         left_var = op.left.value if hasattr(op.left, 'value') else None
         right_var = op.right.value if hasattr(op.right, 'value') else None
         
-        print(f"  DEBUG ARITHMETIC: op.type={op.type.name}, left={left_var}, right={right_var}")
+
         
         # Загружаем левый операнд
         if left_var:
@@ -915,12 +871,11 @@ class x86AsmGenerator:
         """Генерирует код для выражения, которое может содержать вызовы функций"""
         lines = []
         
-        print(f"DEBUG _generate_expression_with_calls: op.type={op.type.name}")
+
         
         if op.type in [OperationType.ADD, OperationType.SUB, OperationType.MUL, OperationType.DIV]:
             # Сначала вычисляем левую часть
             if op.left:
-                print(f"  Processing left: {op.left.type} = {op.left.value if hasattr(op.left, 'value') else 'None'}")
                 if self._contains_function_call(op.left):
                     left_lines = self._generate_expression_with_calls(op.left, func, local_vars)
                     lines.extend(left_lines)
@@ -940,7 +895,6 @@ class x86AsmGenerator:
             
             # Затем вычисляем правую часть
             if op.right:
-                print(f"  Processing right: {op.right.type} = {op.right.value if hasattr(op.right, 'value') else 'None'}")
                 if op.right.type == OperationType.CALL:
                     # Вызов функции в правой части
                     func_name = op.right.value

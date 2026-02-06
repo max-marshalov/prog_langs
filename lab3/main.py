@@ -1,9 +1,11 @@
-
 import sys
 import os
+import subprocess
 from pathlib import Path
 
-from generators.x86_gen import x86AsmGenerator
+from generators.win_x86_gen import WinX86AsmGenerator
+from generators.linux_x86_gen import LinuxX86AsmGenerator
+from generators.riscv_gen import RiscV64AsmGenerator
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -11,12 +13,12 @@ from ast_parser import SimpleParser
 from control_flow import ControlFlowBuilder
 from visualizer import GraphVisualizer, HAS_GRAPHVIZ
 
-def process_file(file_path: str, output_dir: str = ".", generate_asm = False) -> bool:
+def process_file(file_path: str, output_dir: str = ".", generate_asm = True, 
+                 asm_generator: str = "linux", auto_build: bool = False) -> bool:
     
     if not os.path.exists(file_path):
         print(f"Ошибка: файл '{file_path}' не найден")
         return False
-    
     
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -31,23 +33,28 @@ def process_file(file_path: str, output_dir: str = ".", generate_asm = False) ->
         if parser.errors or cfg_builder.errors:
             print(f"  Обнаружены ошибки {parser.errors}, {cfg_builder.errors}, граф не будет построен")
             return False
+        
         # Генерация ассемблерного кода
         if generate_asm and functions:
-                asm_generator = x86AsmGenerator()
-                asm_code = asm_generator.generate_program(functions)
+            if asm_generator == "linux":
+                generator = LinuxX86AsmGenerator()
+            elif asm_generator == 'win':
+                generator = WinX86AsmGenerator()
+            elif asm_generator == 'riscv':
+                generator = RiscV64AsmGenerator()
                 
-                source_name = Path(file_path).stem
-                asm_file = Path(output_dir) / f"{source_name}.asm"
-                
-                with open(asm_file, 'w', encoding='utf-8') as f:
-                    f.write(asm_code)
-                
-                print(f"  Ассемблерный код сохранен в: {asm_file}")
-                print(f"\n  Для сборки выполните:")
-                print(f"    nasm -f win64 {source_name}.asm")
-                print(f"    gcc {source_name}.obj -o {source_name}.exe")
-                print(f"    {source_name}.exe")
-                
+            asm_code = generator.generate_program(functions)
+            
+            source_name = Path(file_path).stem
+            if asm_generator == 'riscv':
+                asm_file = Path(output_dir) / f"{source_name}_{asm_generator}.s"
+            else:
+                asm_file = Path(output_dir) / f"{source_name}_{asm_generator}.asm"
+            
+            with open(asm_file, 'w', encoding='utf-8') as f:
+                f.write(asm_code)
+            
+            print(f"  Ассемблерный код сохранен в: {asm_file}")
                 
         if HAS_GRAPHVIZ:
             source_name = Path(file_path).stem
@@ -74,7 +81,6 @@ def process_file(file_path: str, output_dir: str = ".", generate_asm = False) ->
                             print(f"      Блок {block.id}: {', '.join(conn_info)}")
                         
                         for i, op in enumerate(block.operations):
-                            # Используем тот же метод, что и для PNG визуализации
                             op_info = GraphVisualizer._operation_to_compact_str(op, i)
                             print(f"        {op_info}")
             
@@ -82,13 +88,11 @@ def process_file(file_path: str, output_dir: str = ".", generate_asm = False) ->
                 print(f"  Ошибка создания графа: {graph_error}")
                 return False
         
-       
         if cfg_builder.call_graph:
             print("  Граф вызовов:")
             for caller, callees in cfg_builder.call_graph.items():
                 if callees:
                     print(f"    {caller} -> {', '.join(callees)}")
-        
 
         if parser.errors:
             print("  Ошибки синтаксического анализа:")
@@ -108,15 +112,21 @@ def process_file(file_path: str, output_dir: str = ".", generate_asm = False) ->
         print(f"  Детали: {traceback.format_exc()}")
         return False
 
-
-
 def main():
     if len(sys.argv) < 2:
-        print("Использование: python main.py <файл1> [файл2 ...]")
+        print("Использование: python main.py <файл1> [файл2 ...] [опции]")
+        print("Опции:")
+        print("  --output <директория>    Выходная директория")
+        print("  --generator <linux/win>  Генератор ассемблера (по умолчанию: linux)")
+        print("  --build                  Автоматическая сборка (только для Linux)")
+        print("  --no-asm                 Не генерировать ассемблерный код")
         sys.exit(1)
+    
     input_files = []
     output_dir = "."
     generate_asm = True
+    asm_generator = "linux"
+    auto_build = False
     
     i = 1
     while i < len(sys.argv):
@@ -124,6 +134,20 @@ def main():
         if arg == '--output' and i + 1 < len(sys.argv):
             output_dir = sys.argv[i + 1]
             i += 2
+        elif arg == '--generator' and i + 1 < len(sys.argv):
+            asm_generator = sys.argv[i + 1]
+            if asm_generator not in ['riscv', 'linux', 'win', 'windows']:
+                print(f"Ошибка: неизвестный генератор '{asm_generator}'")
+                sys.exit(1)
+            if asm_generator in ['win', 'windows']:
+                asm_generator = 'win'
+            i += 2
+        elif arg == '--build':
+            auto_build = True
+            i += 1
+        elif arg == '--no-asm':
+            generate_asm = False
+            i += 1
         elif arg.startswith('-'):
             print(f"Неизвестный параметр: {arg}")
             i += 1
@@ -135,15 +159,16 @@ def main():
     output_path.mkdir(parents=True, exist_ok=True)
     
     print(f"\nВыходная директория: {output_path.absolute()}")
+    print(f"Генератор: {asm_generator}")
+    if auto_build and asm_generator == 'linux':
+        print("Автосборка: ВКЛЮЧЕНА")
     print("=" * 60)
     
     success_count = 0
     for file_path in input_files:
-        if process_file(file_path, output_dir, generate_asm):
+        if process_file(file_path, output_dir, generate_asm, asm_generator, auto_build):
             success_count += 1
         print()
-    
-
     
     if success_count > 0:
         print(f"\nPNG файлы сохранены в: {output_path.absolute()}")

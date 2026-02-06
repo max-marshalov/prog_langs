@@ -249,53 +249,22 @@ class ControlFlowBuilder:
     
     def _get_variable_type(self, name: str) -> Optional[str]:
         """Возвращает тип переменной из таблицы символов"""
-        print(f"\nDEBUG _get_variable_type: Looking for '{name}'")
         
         if not self.current_symbol_table:
-            print(f"  ERROR: No current symbol table!")
             return None
         
-        print(f"  Current scope: '{self.current_symbol_table.scope_name}'")
-        
-        # Ищем в текущей и всех родительских областях
         current_table = self.current_symbol_table
-        depth = 0
         
         while current_table:
-            print(f"  Checking scope {depth} '{current_table.scope_name}':")
-            
-            # Проверим прямое наличие
             if name in current_table.variables:
                 var_info = current_table.variables[name]
-                print(f"    ✓ FOUND: {name} -> {var_info.type} (line {var_info.declared_at_line})")
                 return var_info.type
             
-            print(f"    Not found in this scope")
-            
-            # Проверим через метод get_variable (который может искать в родителях)
             var_info = current_table.get_variable(name)
             if var_info:
-                print(f"    ✓ FOUND via get_variable(): {name} -> {var_info.type}")
                 return var_info.type
             
             current_table = current_table.parent
-            depth += 1
-        
-        print(f"  ✗ Variable '{name}' NOT FOUND in any scope")
-        
-        # Выведем все переменные во всех областях для отладки
-        print(f"  All variables in scope hierarchy:")
-        table = self.current_symbol_table
-        depth = 0
-        while table:
-            print(f"    Scope {depth} '{table.scope_name}':")
-            if table.variables:
-                for var_name, info in table.variables.items():
-                    print(f"      {var_name}: {info.type} (line {info.declared_at_line})")
-            else:
-                print(f"      (empty)")
-            table = table.parent
-            depth += 1
         
         return None
     
@@ -311,8 +280,7 @@ class ControlFlowBuilder:
                 column=0,
                 message=f"Ошибка при анализе файла: {str(e)}"
             ))
-            import traceback
-            print(f"Traceback: {traceback.format_exc()}")
+            
             return []
     
     def _analyze_file(self, file_name: str, ast: ASTNode):
@@ -633,13 +601,8 @@ class ControlFlowBuilder:
                     var_name = name_type[0].strip()
                     var_type = name_type[1].strip()
                     
-                    print(f"DEBUG: Found declaration with init: {var_name} -> {var_type} = {value_part}")
-                    
-                    # ВАЖНОЕ ИСПРАВЛЕНИЕ: Сначала добавляем переменную в таблицу символов!
                     if not self._add_variable_to_symbol_table(var_name, var_type, line):
-                        print(f"WARNING: Failed to add variable '{var_name}' to symbol table")
-                    else:
-                        print(f"SUCCESS: Added variable '{var_name}' of type '{var_type}' to symbol table")
+                        pass
                     
                     # Теперь парсим значение (после добавления переменной)
                     value_op = self._parse_expression(value_part, line, column, func_name, file_name)
@@ -669,17 +632,9 @@ class ControlFlowBuilder:
         
         elif expr.endswith('--'):
             var_name = expr[:-2].strip()
-            print(f"DEBUG: Parsing decrement for '{var_name}'")
-            
-            # Попробуем все возможные способы получить тип
-            var_type = None
-            
-            # Способ 1: Из таблицы символов
             var_type = self._get_variable_type(var_name)
             
-            # Способ 2: Если не нашли, попробуем по имени
             if not var_type:
-                print(f"  Variable '{var_name}' not found, trying to infer from name")
                 if var_name == 'i':
                     var_type = 'int'
                 elif var_name == 'f':
@@ -689,12 +644,8 @@ class ControlFlowBuilder:
                 elif var_name == 'a':
                     var_type = 'string'
             
-            # Способ 3: По умолчанию
             if not var_type:
                 var_type = 'int'
-                print(f"  Using default type 'int'")
-            
-            print(f"  Final type for '{var_name}': {var_type}")
             
             return Operation(
                 type=OperationType.DECREMENT,
@@ -792,7 +743,7 @@ class ControlFlowBuilder:
             ('%', OperationType.MOD),
         ]
 
-    # Сначала * / %
+    
         for op_str, op_type in [('*', OperationType.MUL), ('/', OperationType.DIV), ('%', OperationType.MOD)]:
             if op_str in expr:
                 parts = expr.split(op_str, 1)
@@ -818,7 +769,7 @@ class ControlFlowBuilder:
                         result_type=result_type
                     )
 
-        # Затем + -
+        
         for op_str, op_type in [('+', OperationType.ADD), ('-', OperationType.SUB)]:
             if op_str in expr:
                 pos = expr.find(op_str)
@@ -947,27 +898,20 @@ class ControlFlowBuilder:
     def _check_binary_operation_types(self, op_type: OperationType, 
                                 left_type: Optional[str], right_type: Optional[str],
                                 line: int, column: int, file_name: str) -> str:
-        print(f"DEBUG _check_binary_operation_types: {op_type.name}, left={left_type}, right={right_type}")
         
         if not left_type or not right_type:
             return "unknown"
         
-        # Операции сравнения (==, !=, <, <=, >, >=)
         comparison_ops = [OperationType.EQ, OperationType.NE, OperationType.LT, 
                         OperationType.LE, OperationType.GT, OperationType.GE]
         
         if op_type in comparison_ops:
-            print(f"  Comparison operation detected")
-            
-            # Разрешаем сравнение char с char
             if left_type == 'char' and right_type == 'char':
                 return 'bool'
             
-            # Разрешаем сравнение int с int и т.д.
             if left_type == right_type:
                 return 'bool'
             
-            # Проверяем возможность неявного приведения типов
             if not TypeSystem.can_implicit_cast(left_type, right_type) and \
             not TypeSystem.can_implicit_cast(right_type, left_type):
                 self.errors.append(ParsingError(
@@ -979,17 +923,12 @@ class ControlFlowBuilder:
             
             return 'bool'
         
-        # Арифметические операции
         arithmetic_ops = [OperationType.ADD, OperationType.SUB, OperationType.MUL, 
                         OperationType.DIV, OperationType.MOD]
         
         if op_type in arithmetic_ops:
-            print(f"  Arithmetic operation detected")
-            
-            # Определяем допустимые числовые типы (добавляем char как числовой)
             numeric_types = ['char', 'int', 'float', 'double']
             
-            # Проверяем, что оба операнда числовые
             if left_type not in numeric_types:
                 self.errors.append(ParsingError(
                     file_name=file_name,
@@ -1008,13 +947,11 @@ class ControlFlowBuilder:
                 ))
                 return "unknown"
             
-            # Определяем более широкий тип
             type_precedence = {'char': 0, 'int': 1, 'float': 2, 'double': 3}
             left_precedence = type_precedence.get(left_type, -1)
             right_precedence = type_precedence.get(right_type, -1)
             
             result_type = left_type if left_precedence >= right_precedence else right_type
-            print(f"  Result type: {result_type}")
             
             return result_type
         
@@ -1238,7 +1175,7 @@ class ControlFlowBuilder:
     
     def _build_function_call_operation(self, node: ASTNode, func_name: str, file_name: str) -> Optional[Operation]:
         
-        print(f"\nDEBUG _build_function_call_operation for node: {node}")
+        
         
         # Извлекаем имя функции из дочернего узла
         call_func_name = None
@@ -1247,28 +1184,21 @@ class ControlFlowBuilder:
         for child in node.children:
             if child.type == 'function_name':
                 call_func_name = child.value
-                print(f"  Found function_name: '{call_func_name}'")
             elif child.type == 'expression':
                 args_nodes.append(child)
         
         if not call_func_name:
-            print(f"  ERROR: No function name found")
             return None
-        
-        print(f"  Building call to '{call_func_name}' with {len(args_nodes)} args")
         
         args_ops = []
         for i, arg_node in enumerate(args_nodes):
             if arg_node.value:
-                print(f"    Parsing arg {i}: '{arg_node.value}'")
-                
                 # Для scanf все аргументы кроме первого должны быть указателями
                 if call_func_name == 'scanf' and i > 0:
                     # Извлекаем имя переменной (убираем & если есть)
                     var_name = arg_node.value.strip()
                     if var_name.startswith('&'):
                         var_name = var_name[1:].strip()
-                    print(f"      scanf argument: {var_name}, treating as pointer")
                     
                     # Создаем специальную операцию
                     arg_op = Operation(
@@ -1309,16 +1239,11 @@ class ControlFlowBuilder:
         if BuiltinFunctions.is_standard_function(call_func_name):
             func_info = BuiltinFunctions.get_function_info(call_func_name)
             return_type = func_info['return_type']
-            print(f"  ✓ '{call_func_name}' is standard, return_type: {return_type}")
         else:
-            print(f"  ✗ '{call_func_name}' is NOT standard, searching in user functions...")
             for func in self.functions:
                 if func.name == call_func_name:
                     return_type = func.return_type
-                    print(f"  Found user function '{call_func_name}' with return type: {return_type}")
                     break
-            else:
-                print(f"  No user function found, using default return type: {return_type}")
         
         op = Operation(
             type=OperationType.CALL,
